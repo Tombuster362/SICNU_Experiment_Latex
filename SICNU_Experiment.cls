@@ -27,7 +27,50 @@
 %===========================================================
 
 
+\RequirePackage{geometry}
+\RequirePackage{xparse}
 
+\ExplSyntaxOn
+
+\dim_new:N \g_my_page_top_dim
+\dim_new:N \g_my_page_bottom_dim
+
+\cs_new_protected:Npn \my_expand_page:
+  {
+    % 复制当前要输出的页面盒
+    \box_set_eq:NN \l_tmpa_box \ShipoutBox
+
+    % 保持原总高度不变，把整页内容向上移动 top 距离
+    \setbox\ShipoutBox=\vbox to
+      \dimexpr\ht\l_tmpa_box+\dp\l_tmpa_box\relax
+      {
+        \kern-\g_my_page_top_dim
+        \box_use:N \l_tmpa_box
+        \vss
+      }
+  }
+
+\NewDocumentCommand{\expandthispage}{mm}
+  {
+    % 保存本页的上下扩展量
+    \dim_gset:Nn \g_my_page_top_dim    {#1}
+    \dim_gset:Nn \g_my_page_bottom_dim {#2}
+
+    % 告诉 TeX：当前页总共可以多放这么多内容
+    \enlargethispage{
+      \dimexpr
+        \g_my_page_top_dim+\g_my_page_bottom_dim
+      \relax
+    }
+
+    % 只对“紧接着输出的这一页”进行位置调整
+    \AddToHookNext{shipout/before}
+      {
+        \my_expand_page:
+      }
+  }
+
+\ExplSyntaxOff
 
 
 
@@ -419,6 +462,7 @@
 }
       \thispagestyle{empty}%
       \setcounter{part}{1}%
+      \expandthispage{-13.2cm}{0cm}
       \afterpage{\aftergroup\restoregeometry}
       \LabReportCoverOverlay
 }
@@ -565,22 +609,3 @@
 % ============================================================
 
 \makeatother
-
-%===========================================================
-% 文档开始时，先把第一页切换到特殊布局
-\AtBeginDocument{%
-  \newgeometry{
-  a4paper,
-  left=15mm,
-  right=15mm,
-  top=13.8cm,
-  bottom=2.2mm,
-  includefoot
-}
-\AddToHookNext{shipout/after}{%
-  \afterpage{\aftergroup\restoregeometry}
-}
-}
-
-
-%===========================================================
