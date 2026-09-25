@@ -577,6 +577,9 @@
   bottom=2.2mm,
   includefoot
 }
+\AddToHookNext{shipout/after}{%
+  \afterpage{\aftergroup\restoregeometry}
+}
 }
 
 
