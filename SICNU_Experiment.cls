@@ -463,7 +463,6 @@
       \thispagestyle{empty}%
       \setcounter{part}{1}%
       \expandthispage{-13.2cm}{0cm}
-      \afterpage{\aftergroup\restoregeometry}
       \LabReportCoverOverlay
 }
 %============================================================
